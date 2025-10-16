@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SmartChef 🍳</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" defer></script>
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+
+<body style=""  class="bg-gradient-to-br   from-zinc-900 via-zinc-900 to-zinc-900 min-h-screen text-gray-100 font-sans">
+
+    <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <header class="text-center mb-16">
+            <h1
+                class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text text-white  drop-shadow-2xl">
+                SmartChef 🍳
+            </h1>
+            <p class="text-zinc-300 mt-4 text-lg md:text-xl font-light">
+                Manage Recipes, Calculate Calories, & Suggest Dishes
+            </p>
+        </header>
+
+        <main class="grid gap-6 sm:gap-8 grid-cols-1 lg:grid-cols-2">
+            <section
+                class="bg-gradient-to-br from-zinc-800/40 to-zinc-900/40 backdrop-blur-sm p-8 rounded-3xl shadow-2xl border border-zinc-700/30 hover:shadow-zinc-900/50 hover:border-zinc-600/50 transition-all duration-300 hover:-translate-y-1">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6 text-zinc-300 flex items-center gap-2">
+                    <span class="text-3xl">🧮</span>
+                    Calculate Recipe Calories
+                </h2>
+                <form method="POST" class="space-y-4" onsubmit="return handleCalories(event)">
+                    <textarea name="recipe_input" placeholder="ingredient, quantity_in_grams per line" rows="5"
+                        class="w-full p-4 bg-zinc-900/60 border border-zinc-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-transparent text-gray-100 placeholder-zinc-400 resize-none transition-all">{{ recipe_input }}</textarea>
+                    <input type="hidden" name="action" value="calc_calories" />
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-700 hover:to-zinc-800 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-zinc-900/50 active:scale-95">
+                        Calculate Calories
+                    </button>
+                </form>
+                {% if calories %}
+                <div class="mt-6 p-4 bg-green-900/30 border border-green-700/50 rounded-xl">
+                    <p class="font-semibold text-green-300 text-lg">
+                        ✅ Total Calories: <span class="text-2xl">{{ calories }}</span>
+                    </p>
+                </div>
+                {% endif %}
+            </section>
+
+            <section
+                class="bg-gradient-to-br from-zinc-800/40 to-zinc-900/40 backdrop-blur-sm p-8 rounded-3xl shadow-2xl border border-zinc-700/30 hover:shadow-zinc-900/50 hover:border-zinc-600/50 transition-all duration-300 hover:-translate-y-1">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6 text-zinc-300 flex items-center gap-2">
+                    <span class="text-3xl">⚖️</span>
+                    Compare Ingredients
+                </h2>
+                <form method="POST" class="space-y-4" onsubmit="return handleCompare(event)">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <input type="text" name="ing1" placeholder="Ingredient 1"
+                            value="{{ ing1 }}"
+                            class="flex-1 p-4 bg-zinc-900/60 border border-zinc-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-transparent text-gray-100 placeholder-zinc-400 transition-all" />
+                        <input type="text" name="ing2" placeholder="Ingredient 2"
+                            value="{{ ing2 }}"
+                            class="flex-1 p-4 bg-zinc-900/60 border border-zinc-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-transparent text-gray-100 placeholder-zinc-400 transition-all" />
+                    </div>
+                    <input type="hidden" name="action" value="compare" />
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-700 hover:to-zinc-800 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-zinc-900/50 active:scale-95">
+                        Compare
+                    </button>
+                </form>
+                {% if result %}
+                <div class="mt-6 p-4 bg-green-900/30 border border-green-700/50 rounded-xl">
+                    <p class="font-medium text-green-300">{{ result }}</p>
+                </div>
+                {% endif %}
+            </section>
+
+            <section
+                class="bg-gradient-to-br from-zinc-800/40 to-zinc-900/40 backdrop-blur-sm p-8 rounded-3xl shadow-2xl border border-zinc-700/30 hover:shadow-zinc-900/50 hover:border-zinc-600/50 transition-all duration-300 hover:-translate-y-1">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6 text-zinc-300 flex items-center gap-2">
+                    <span class="text-3xl">🛒</span>
+                    Create Shopping List
+                </h2>
+                <form method="POST" class="space-y-4" onsubmit="return handleShopping(event)">
+                    <textarea name="shopping_input" placeholder="Multiple recipes separated by blank line" rows="5"
+                        class="w-full p-4 bg-zinc-900/60 border border-zinc-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-transparent text-gray-100 placeholder-zinc-400 resize-none transition-all">{{ shopping_input }}</textarea>
+                    <input type="hidden" name="action" value="shopping" />
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-700 hover:to-zinc-800 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-zinc-900/50 active:scale-95">
+                        Generate Shopping List
+                    </button>
+                </form>
+                {% if shopping_list %}
+                <div class="mt-6 p-4 bg-zinc-900/60 border border-zinc-700/50 rounded-xl overflow-x-auto">
+                    <pre class="text-zinc-100 text-sm font-mono whitespace-pre-wrap">{{ shopping_list }}</pre>
+                </div>
+                {% endif %}
+            </section>
+
+            <section
+                class="bg-gradient-to-br from-zinc-800/40 to-zinc-900/40 backdrop-blur-sm p-8 rounded-3xl shadow-2xl border border-zinc-700/30 hover:shadow-zinc-900/50 hover:border-zinc-600/50 transition-all duration-300 hover:-translate-y-1">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6 text-zinc-300 flex items-center gap-2">
+                    <span class="text-3xl">💡</span>
+                    Suggest Recipes
+                </h2>
+                <form method="POST" class="space-y-4" onsubmit="return handleSuggest(event)">
+                    <textarea name="available" placeholder="Available ingredients separated by comma" rows="3"
+                        class="w-full p-4 bg-zinc-900/60 border border-zinc-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-transparent text-gray-100 placeholder-zinc-400 resize-none transition-all">{{ available }}</textarea>
+                    <input type="hidden" name="action" value="suggest" />
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-700 hover:to-zinc-800 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-zinc-900/50 active:scale-95">
+                        Suggest Recipes
+                    </button>
+                </form>
+                {% if result %}
+                <div class="mt-6 p-4 bg-zinc-900/60 border border-zinc-700/50 rounded-xl overflow-x-auto">
+                    <pre class="text-zinc-100 text-sm font-mono whitespace-pre-wrap">{{ result }}</pre>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>
